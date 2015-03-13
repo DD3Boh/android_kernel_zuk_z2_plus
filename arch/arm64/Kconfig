@@ -1055,6 +1055,8 @@ config ARM64_ERRATUM_843419
 
 	  If unsure, say Y.
 
+source "drivers/cpuquiet/Kconfig"
+
 endmenu
 
 source "net/Kconfig"
