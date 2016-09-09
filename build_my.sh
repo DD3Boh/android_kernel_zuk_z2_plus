@@ -2,12 +2,12 @@
 export CONFIG_FILE="darkmoon_defconfig"
 export ARCH="arm64"
 export CROSS_COMPILE="aarch64-linux-android-"
-export TOOL_CHAIN_PATH="/home/dd3/kernel/aarch64-linux-android-6.x/bin"
+export TOOL_CHAIN_PATH="/home/dd3/kernel/zuk/aarch64-linux-android-6.x/bin"
 export CONFIG_ABS_PATH="arch/${ARCH}/configs/${CONFIG_FILE}"
 export PATH=$PATH:${TOOL_CHAIN_PATH}
 export objdir="${HOME}/kernel/zuk/obj"
-export sourcedir="/home/dd3/kernel/kernel"
-export anykernel="/home/dd3/kernel/anykernel"
+export sourcedir="/home/dd3/kernel/zuk/kernel"
+export anykernel="/home/dd3/kernel/zuk/anykernel"
 compile() {
   make O=$objdir ARCH=arm64 CROSS_COMPILE=${TOOL_CHAIN_PATH}/${CROSS_COMPILE}  $CONFIG_FILE -j4
   make O=$objdir -j6
