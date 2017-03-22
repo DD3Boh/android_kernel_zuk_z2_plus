@@ -496,27 +496,18 @@ static void wakeup_source_activate(struct wakeup_source *ws)
 {
 	unsigned int cec;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 	if ((!enable_ipa_ws && !strncmp(ws->name, "IPA_WS", 6)) ||
 		(!enable_wlan_extscan_wl_ws &&
 			!strncmp(ws->name, "wlan_extscan_wl", 15)) ||
 		(!enable_qcom_rx_wakelock_ws &&
 			!strncmp(ws->name, "qcom_rx_wakelock", 16))) {
-=======
 	if (!enable_ipa_ws && !strncmp(ws->name, "IPA_WS", 6)) {
->>>>>>> 99217b1... power: wakeup: prevent IPA_WS wakelock from being acquired by default
 		if (ws->active)
 			wakeup_source_deactivate(ws);
 
 		return;
 	}
 
-<<<<<<< HEAD
->>>>>>> bcf8ed7... drivers: wakeup: bypass two WiFi wakelocks
-=======
->>>>>>> 99217b1... power: wakeup: prevent IPA_WS wakelock from being acquired by default
 	/*
 	 * active wakeup source should bring the system
 	 * out of PM_SUSPEND_FREEZE state
@@ -767,8 +758,26 @@ void pm_print_active_wakeup_sources(void)
 	rcu_read_lock();
 	list_for_each_entry_rcu(ws, &wakeup_sources, entry) {
 		if (ws->active) {
+			int wslen = strlen(ws->name);
+
 			pr_info("active wakeup source: %s\n", ws->name);
-			active = 1;
+
+			if ((!enable_ipa_ws && !strncmp(ws->name, "IPA_WS", wslen)) ||
+				(!enable_wlan_extscan_wl_ws &&
+					!strncmp(ws->name, "wlan_extscan_wl", wslen)) ||
+				(!enable_qcom_rx_wakelock_ws &&
+					!strncmp(ws->name, "qcom_rx_wakelock", wslen)) ||
+				(!enable_wlan_ws &&
+					!strncmp(ws->name, "wlan", wslen)) ||
+				(!enable_timerfd_ws &&
+					!strncmp(ws->name, "[timerfd]", wslen)) ||
+				(!enable_netlink_ws &&
+					!strncmp(ws->name, "NETLINK", wslen))) {
+				wakeup_source_deactivate(ws);
+				pr_info("forcefully deactivate wakeup source: %s\n", ws->name);
+			} else {
+				active = 1;
+			}
 		} else if (!active &&
 			   (!last_activity_ws ||
 			    ktime_to_ns(ws->last_time) >
