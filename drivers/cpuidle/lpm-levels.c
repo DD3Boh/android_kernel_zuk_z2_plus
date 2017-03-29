@@ -109,7 +109,7 @@ struct lpm_history {
 	int64_t stime;
 };
 
-static DEFINE_PER_CPU(struct lpm_history, hist);
+//static DEFINE_PER_CPU(struct lpm_history, hist);
 static DEFINE_PER_CPU(struct lpm_cluster*, cpu_cluster);
 static bool suspend_in_progress;
 static struct hrtimer lpm_hrtimer;
