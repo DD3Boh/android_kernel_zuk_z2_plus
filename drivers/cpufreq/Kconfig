@@ -262,8 +262,6 @@ config CPU_FREQ_GOV_INTERACTIVE
 
 	  If in doubt, say N.
 
-<<<<<<< HEAD
-=======
 config CPU_FREQ_GOV_NEBULA
 	tristate "'nebula' cpufreq policy governor"
 	help
@@ -289,7 +287,6 @@ config CPU_FREQ_GOV_IMPULSE
 
 	  If in doubt, say N.
 
->>>>>>> a47daf9... cpufreq: Gov: Introduce cpufreq_nebula: Based on Interactive ported from msm-4.4
 config CPU_FREQ_GOV_ELEMENTALX
 	tristate "'elementalx' cpufreq policy governor"
 	select CPU_FREQ_TABLE

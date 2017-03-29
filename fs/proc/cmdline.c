@@ -31,29 +31,9 @@ static const struct file_operations cmdline_proc_fops = {
 
 static int __init proc_cmdline_init(void)
 {
-<<<<<<< HEAD
 	char *offset_addr, *cmd = new_command_line;
 
 	strcpy(cmd, saved_command_line);
-
-	/*
-	 * Remove 'androidboot.verifiedbootstate' flag from command line seen
-	 * by userspace in order to pass SafetyNet CTS check.
-	 */
-	offset_addr = strstr(cmd, "androidboot.verifiedbootstate=");
-	if (offset_addr) {
-		size_t i, len, offset;
-
-		len = strlen(cmd);
-		offset = offset_addr - cmd;
-
-		for (i = 1; i < (len - offset); i++) {
-			if (cmd[offset + i] == ' ')
-				break;
-		}
-
-		memmove(offset_addr, &cmd[offset + i + 1], len - i - offset);
-=======
 	/* SafetyNet bypass: show androidboot.verifiedbootstate=green */
 	char *a1, *a2;
 
@@ -69,7 +49,6 @@ static int __init proc_cmdline_init(void)
 			  saved_command_line, a2);
 	} else {
 		strncpy(proc_cmdline, saved_command_line, COMMAND_LINE_SIZE);
->>>>>>> 7f5f0fc... proc: Set androidboot.verifiedbootstate=green
 	}
 
 	proc_create("cmdline", 0, NULL, &cmdline_proc_fops);
