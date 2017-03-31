@@ -18,6 +18,7 @@
 #include <linux/moduleparam.h>
 #include <trace/events/power.h>
 #include <linux/moduleparam.h>
+#include "power.h"
 
 static bool enable_wlan_rx_wake_ws = true;
 module_param(enable_wlan_rx_wake_ws, bool, 0644);
@@ -29,9 +30,6 @@ static bool enable_bluedroid_timer_ws = true;
 module_param(enable_bluedroid_timer_ws, bool, 0644);
 static bool enable_bluesleep_ws = true;
 module_param(enable_bluesleep_ws, bool, 0644);
-
-#include "power.h"
-
 static bool enable_qcom_rx_wakelock_ws = true;
 module_param(enable_qcom_rx_wakelock_ws, bool, 0644);
 static bool enable_wlan_extscan_wl_ws = true;
@@ -537,18 +535,22 @@ static void wakeup_source_activate(struct wakeup_source *ws)
 	 */
 	freeze_wake();
 
-	if (!enable_wlan_rx_wake_ws && !strcmp(ws->name, "wlan_rx_wake"))
-                return;
-
-	if (!enable_wlan_ctrl_wake_ws && !strcmp(ws->name, "wlan_ctrl_wake"))
-                return;
-
-	if (!enable_wlan_wake_ws && !strcmp(ws->name, "wlan_wake"))
-                return;
-
-	if (!enable_bluedroid_timer_ws && !strcmp(ws->name, "bluedroid_timer"))
+	if (((!enable_wlan_rx_wake_ws && !strcmp(ws->name, "wlan_rx_wake")) ||
+		(!enable_wlan_ctrl_wake_ws &&
+			!strcmp(ws->name, "wlan_ctrl_wake")) ||
+		(!enable_wlan_wake_ws &&
+			!strcmp(ws->name, "wlan_wake")) ||
+		(!enable_bluedroid_timer_ws &&
+			!strcmp(ws->name, "bluedroid_timer"))||
+		(!enable_bluesleep_ws && !strcmp(ws->name, "bluesleep")))) {
+		/*
+		 * let's try and deactivate this wakeup source since the user
+		 * clearly doesn't want it. The user is responsible for any
+		 * adverse effects and has been warned about it
+		 */
+		wakeup_source_deactivate(ws);
 		return;
-
+	}
 	ws->active = true;
 	ws->active_count++;
 	ws->last_time = ktime_get();
