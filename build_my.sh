@@ -1,5 +1,5 @@
 #!/bin/bash
-export CONFIG_FILE="lineageos_z2_plus_defconfig"
+export CONFIG_FILE="darkmoon_defconfig"
 export ARCH="arm64"
 export CROSS_COMPILE="aarch64-linux-android-"
 export TOOL_CHAIN_PATH="/home/dd3/kernel/aarch64-linux-android-ub-4.9/bin"
