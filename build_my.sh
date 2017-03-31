@@ -6,7 +6,7 @@ export TOOL_CHAIN_PATH="/home/dd3/kernel/aarch64-linux-android-6.x/bin"
 export CONFIG_ABS_PATH="arch/${ARCH}/configs/${CONFIG_FILE}"
 export PATH=$PATH:${TOOL_CHAIN_PATH}
 export objdir="${HOME}/kernel/zuk/obj"
-export sourcedir="/home/dd3/kernel/zuk/msm8996"
+export sourcedir="/home/dd3/kernel/kernel"
 export anykernel="/home/dd3/kernel/anykernel"
 compile() {
   make O=$objdir ARCH=arm64 CROSS_COMPILE=${TOOL_CHAIN_PATH}/${CROSS_COMPILE}  $CONFIG_FILE -j4
@@ -40,10 +40,14 @@ build_package(){
   cd $anykernel
   zip -r9 UPDATE-AnyKernel2.zip * -x README UPDATE-AnyKernel2.zip
 }
+turn_back(){
+cd $sourcedir
+}
 #clean
 compile
 module_stock
 build_package
+turn_back
 #dtbuild
 #cp $objdir/arch/arm64/boot/zImage $sourcedir/zImage
 #cp $objdir/arch/arm64/boot/dt.img.lz4 $sourcedir/dt.img
