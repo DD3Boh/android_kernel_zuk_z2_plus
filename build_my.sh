@@ -16,22 +16,20 @@ clean() {
   make O=$objdir mrproper
 }
 module_stock(){
-  rm -rf /${HOME}/kernel/zuk/anykernel/modules/
-  mkdir /${HOME}/kernel/zuk/anykernel/modules
-  find $objdir -name '*.ko' -exec cp -av {} /${HOME}/kernel/zuk/anykernel/modules/ \;
+  rm -rf ${HOME}/kernel/anykernel/modules/
+  mkdir ${HOME}/kernel/anykernel/modules
+  find $objdir -name '*.ko' -exec cp -av {} ${HOME}/kernel/anykernel/modules/ \;
   # strip modules
- ${TOOL_CHAIN_PATH}/${CROSS_COMPILE}strip --strip-unneeded ${HOME}/kernel/zuk/anykernel/modules/*
-  mkdir /${HOME}/kernel/zuk/anykernel/modules/qca_cld
-  mv /${HOME}/kernel/zuk/anykernel/modules/wlan.ko /${HOME}/kernel/zuk/anykernel/modules/qca_cld/qca_cld_wlan.ko
-  cp -rf $objdir/arch/arm64/boot/Image.gz-dtb /${HOME}/kernel/zuk/anykernel/zImage
+ ${TOOL_CHAIN_PATH}/${CROSS_COMPILE}strip --strip-unneeded ${HOME}/kernel/anykernel/modules/*
+  cp -rf $objdir/arch/arm64/boot/Image.gz-dtb ${HOME}/kernel/anykernel/zImage
 }
 module_cm(){
-  rm -rf /${HOME}/kernel/zuk/anykernel/modules/
-  mkdir /${HOME}/kernel/zuk/anykernel/modules
-  find $objdir -name '*.ko' -exec cp -av {} /${HOME}/kernel/zuk/anykernel/modules/ \;
+  rm -rf ${HOME}/kernel/anykernel/modules/
+  mkdir ${HOME}/kernel/anykernel/modules
+  find $objdir -name '*.ko' -exec cp -av {} ${HOME}/kernel/anykernel/modules/ \;
   # strip modules
- ${TOOL_CHAIN_PATH}/${CROSS_COMPILE}strip --strip-unneeded ${HOME}/kernel/zuk/anykernel/modules/*
-  cp -rf $objdir/arch/arm64/boot/Image.gz-dtb /${HOME}/kernel/zuk/anykernel/zImage
+ ${TOOL_CHAIN_PATH}/${CROSS_COMPILE}strip --strip-unneeded ${HOME}/kernel/anykernel/modules/*
+  cp -rf $objdir/arch/arm64/boot/Image.gz-dtb ${HOME}/kernel/anykernel/zImage
 }
 dtbuild(){
   cd $sourcedir
