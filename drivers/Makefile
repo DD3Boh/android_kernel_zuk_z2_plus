@@ -174,4 +174,4 @@ obj-$(CONFIG_SENSORS_SSC)	+= sensors/
 # <t-base drivers
 obj-$(CONFIG_MOBICORE_DRIVER)	+= gud/
 
-obj-$(CONFIG_CPUQUIET_FRAMEWORK)		+= cpuquiet/
+obj-$(CONFIG_CPU_QUIET)		+= cpuquiet/
