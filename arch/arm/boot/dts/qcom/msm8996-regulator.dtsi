@@ -513,8 +513,8 @@
 			compatible = "qcom,spm-regulator";
 			reg = <0x3200 0x100>;
 			regulator-name = "pm8994_s11";
-			regulator-min-microvolt = <470000>;
-			regulator-max-microvolt = <1140000>;
+			regulator-min-microvolt = <1050000>;
+			regulator-max-microvolt = <1700000>;
 			qcom,max-voltage-step = <150000>;
 			qcom,cpu-num = <0>;
 			qcom,recal-mask = <3>;
@@ -619,7 +619,7 @@
 			apc0_pwrcl_vreg: regulator-pwrcl {
 				regulator-name = "apc0_pwrcl_corner";
 				regulator-min-microvolt = <1>;
-				regulator-max-microvolt = <17>;
+				regulator-max-microvolt = <20>;
 
 				qcom,cpr-pd-bypass-mask = <0x07>;
 				qcom,cpr-fuse-corners = <5>;
@@ -650,7 +650,8 @@
 					<670000  670000  745000  745000  745000
 					 745000  745000  905000  905000  905000
 					 905000  905000 1140000 1140000 1140000
-					1140000 1140000>,
+					1140000 1140000 1700000 1700000 1700000
+					1700000 1700000>,
 
 					/* Speed bin 1 */
 					<670000  670000  745000  745000  745000
