@@ -517,6 +517,23 @@ static void wakeup_source_activate(struct wakeup_source *ws)
 {
 	unsigned int cec;
 
+	if ((!enable_ipa_ws && !strncmp(ws->name, "IPA_WS", 6)) ||
+		(!enable_wlan_extscan_wl_ws &&
+			!strncmp(ws->name, "wlan_extscan_wl", 15)) ||
+		(!enable_qcom_rx_wakelock_ws &&
+			!strncmp(ws->name, "qcom_rx_wakelock", 16)) ||
+		(!enable_wlan_ws &&
+                        !strncmp(ws->name, "wlan", 4)) ||
+		(!enable_timerfd_ws &&
+                        !strncmp(ws->name, "[timerfd]", 9)) ||
+		(!enable_netlink_ws &&
+                        !strncmp(ws->name, "NETLINK", 7))) {
+		if (ws->active)
+			wakeup_source_deactivate(ws);
+
+		return;
+	}
+
 	/*
 	 * active wakeup source should bring the system
 	 * out of PM_SUSPEND_FREEZE state
