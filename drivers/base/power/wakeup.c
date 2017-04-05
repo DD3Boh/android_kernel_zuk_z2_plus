@@ -462,7 +462,37 @@ static void wakeup_source_deactivate(struct wakeup_source *ws)
 	if (!inpr && waitqueue_active(&wakeup_count_wait_queue))
 		wake_up(&wakeup_count_wait_queue);
 }
+static bool wakeup_source_blocker(struct wakeup_source *ws)
+{
+	unsigned int wslen = 0;
 
+	if (ws) {
+		wslen = strlen(ws->name);
+
+		if ((!enable_ipa_ws && !strncmp(ws->name, "IPA_WS", wslen) &&
+				ws->active) ||
+			(!enable_wlan_extscan_wl_ws &&
+				!strncmp(ws->name, "wlan_extscan_wl", wslen)) ||
+			(!enable_qcom_rx_wakelock_ws &&
+				!strncmp(ws->name, "qcom_rx_wakelock", wslen)) ||
+			(!enable_wlan_ws &&
+				!strncmp(ws->name, "wlan", wslen)) ||
+			(!enable_timerfd_ws &&
+				!strncmp(ws->name, "[timerfd]", wslen)) ||
+			(!enable_netlink_ws &&
+				!strncmp(ws->name, "NETLINK", wslen))) {
+			if (ws->active) {
+				wakeup_source_deactivate(ws);
+				pr_info("forcefully deactivate wakeup source: %s\n",
+					ws->name);
+			}
+
+			return true;
+		}
+	}
+
+	return false;
+}
 /*
  * The functions below use the observation that each wakeup event starts a
  * period in which the system should not be suspended.  The moment this period
@@ -544,14 +574,16 @@ static void wakeup_source_activate(struct wakeup_source *ws)
  */
 static void wakeup_source_report_event(struct wakeup_source *ws)
 {
-	if (!wakeup_source_blocker(ws)) {
-		ws->event_count++;
-		/* This is racy, but the counter is approximate anyway. */
-		if (events_check_enabled)
-			ws->wakeup_count++;
+	if (!is_display_on()) {
+		if (!wakeup_source_blocker(ws)) {
+			ws->event_count++;
+			/* This is racy, but the counter is approximate anyway. */
+			if (events_check_enabled)
+				ws->wakeup_count++;
 
-		if (!ws->active)
-			wakeup_source_activate(ws);
+			if (!ws->active)
+				wakeup_source_activate(ws);
+		}
 	}
 }
 
