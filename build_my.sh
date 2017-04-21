@@ -1,10 +1,10 @@
 #!/bin/bash
 export CONFIG_FILE="darkmoon_defconfig"
 export ARCH="arm64"
-export CROSS_COMPILE="aarch64-linux-android-"
+export CROSS_COMPILE="aarch64-linux-gnu-"
 export KBUILD_BUILD_USER="haha"
 export KBUILD_BUILD_HOST="DD3Boh"
-export TOOL_CHAIN_PATH="/home/dd3/kernel/aarch64-linux-android-6.x/bin"
+export TOOL_CHAIN_PATH="/home/dd3/kernel/linaro-6.3-aarch64-linux/bin"
 export CONFIG_ABS_PATH="arch/${ARCH}/configs/${CONFIG_FILE}"
 export PATH=$PATH:${TOOL_CHAIN_PATH}
 export objdir="${HOME}/kernel/zuk/obj"
