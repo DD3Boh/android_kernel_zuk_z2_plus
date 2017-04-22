@@ -430,6 +430,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Wno-shift-overflow \
 		   -Wno-bool-compare \
 		   -Wno-incompatible-pointer-types \
+		   -Wno-unused-variable \
 		   -std=gnu89
 
 KBUILD_AFLAGS_KERNEL :=
