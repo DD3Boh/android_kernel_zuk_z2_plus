@@ -1845,12 +1845,6 @@ static inline void add_nr_running(struct rq *rq, unsigned count)
 	sched_update_nr_prod(cpu_of(rq), count, true);
 	rq->nr_running = prev_nr + count;
 
-	if (prev_nr < 2 && rq->nr_running >= 2) {
- #ifdef CONFIG_SMP
- 		if (!rq->rd->overload)
- 			rq->rd->overload = true;
- #endif
- 
 #ifdef CONFIG_NO_HZ_FULL
 		if (tick_nohz_full_cpu(rq->cpu)) {
 			/*
