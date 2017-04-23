@@ -190,7 +190,6 @@ static unsigned int __read_mostly *nr_run_profiles[] = {
 	nr_run_thresholds_eco,
 	nr_run_thresholds_eco_extreme,
 	nr_run_thresholds_disable,
-	nr_run_thresholds_lazy,
 };
 
 #define NR_RUN_ECO_MODE_PROFILE	3
@@ -436,7 +435,7 @@ void lazyplug_enter_lazy(bool enter)
 		pr_info("lazyplug: entering lazy mode\n");
 		Lnr_run_profile_sel = nr_run_profile_sel;
 		Ltouch_boost_active = touch_boost_active;
-		nr_run_profile_sel = 6; /* lazy profile */
+		nr_run_profile_sel = 2; /* conversative profile */
 		touch_boost_active = false;
 		Lprevious_state = true;
 	} else if (!enter && Lprevious_state) {
