@@ -7,9 +7,9 @@ export KBUILD_BUILD_HOST="DD3Boh"
 export TOOL_CHAIN_PATH="${HOME}/kernel/linaro-6.3-aarch64-linux/bin"
 export CONFIG_ABS_PATH="arch/${ARCH}/configs/${CONFIG_FILE}"
 export PATH=$PATH:${TOOL_CHAIN_PATH}
-export objdir="${HOME}/kernel/zuk/obj"
-export sourcedir="${HOME}/kernel/zuk/kernel"
-export anykernel="${HOME}/kernel/zuk/anykernel"
+export objdir="${HOME}/kernel/zuk/lightmoon-obj"
+export sourcedir="${HOME}/kernel/zuk/LightMoon"
+export anykernel="${HOME}/kernel/zuk/lightmoon-anykernel"
 compile() {
   make O=$objdir ARCH=arm64 CROSS_COMPILE=${TOOL_CHAIN_PATH}/${CROSS_COMPILE}  $CONFIG_FILE -j4
   make O=$objdir -j6
