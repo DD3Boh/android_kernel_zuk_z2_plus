@@ -431,6 +431,14 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Wno-bool-compare \
 		   -Wno-incompatible-pointer-types \
 		   -Wno-unused-variable \
+		   -Wno-format-truncation \
+		   -Wno-duplicate-decl-specifier \
+		   -Wno-bool-operation \
+		   -Wno-memset-elt-size \
+		   -Wno-parentheses \
+		   -Wno-switch-unreachable \
+		   -Wno-int-in-bool-context \
+		   -Wno-format-overflow \
 		   -std=gnu89
 
 KBUILD_AFLAGS_KERNEL :=
