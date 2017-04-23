@@ -402,6 +402,64 @@ static void wakeup_boost(void)
 	}
 }
 
+#if defined(CONFIG_POWERSUSPEND) || defined(CONFIG_HAS_EARLYSUSPEND)
+#ifdef CONFIG_POWERSUSPEND
+static void lazyplug_suspend(struct power_suspend *handler)
+#else
+static void lazyplug_suspend(struct early_suspend *handler)
+#endif
+{
+	if (lazyplug_active) {
+		pr_info("lazyplug: screen-off, turn off cores\n");
+		flush_workqueue(lazyplug_wq);
+
+		mutex_lock(&lazyplug_mutex);
+		suspended = true;
+		mutex_unlock(&lazyplug_mutex);
+
+		// put rest of the cores to sleep unconditionally!
+		cpu_all_ctrl(false);
+	}
+}
+
+#ifdef CONFIG_POWERSUSPEND
+static void lazyplug_resume(struct power_suspend *handler)
+#else
+static void lazyplug_resume(struct early_suspend *handler)
+#endif
+{
+	if (lazyplug_active) {
+		pr_info("lazyplug: screen-on, turn on cores\n");
+		mutex_lock(&lazyplug_mutex);
+		/* keep cores awake long enough for faster wake up */
+		persist_count = BUSY_PERSISTENCE;
+		suspended = false;
+		mutex_unlock(&lazyplug_mutex);
+
+		cpu_all_ctrl(true);
+
+		wakeup_boost();
+	}
+	queue_delayed_work_on(0, lazyplug_wq, &lazyplug_work,
+		msecs_to_jiffies(10));
+}
+#endif
+
+#ifdef CONFIG_POWERSUSPEND
+static struct power_suspend lazyplug_power_suspend_driver = {
+	.suspend = lazyplug_suspend,
+	.resume = lazyplug_resume,
+};
+#endif  /* CONFIG_POWERSUSPEND */
+
+#ifdef CONFIG_HAS_EARLYSUSPEND
+static struct early_suspend lazyplug_early_suspend_driver = {
+        .level = EARLY_SUSPEND_LEVEL_DISABLE_FB + 10,
+        .suspend = lazyplug_suspend,
+        .resume = lazyplug_resume,
+};
+#endif	/* CONFIG_HAS_EARLYSUSPEND */
+
 static unsigned int Lnr_run_profile_sel = 0;
 static unsigned int Ltouch_boost_active = true;
 static bool Lprevious_state = false;
