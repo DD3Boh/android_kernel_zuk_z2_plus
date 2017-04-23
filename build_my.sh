@@ -1,5 +1,5 @@
 #!/bin/bash
-export CONFIG_FILE="darkmoon_defconfig"
+export CONFIG_FILE="lightmoon_defconfig"
 export ARCH="arm64"
 export CROSS_COMPILE="aarch64-linux-android-"
 export KBUILD_BUILD_USER="haha"
