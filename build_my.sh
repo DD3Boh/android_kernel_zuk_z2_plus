@@ -1,15 +1,15 @@
 #!/bin/bash
 export CONFIG_FILE="darkmoon_defconfig"
 export ARCH="arm64"
-export CROSS_COMPILE="aarch64-linux-gnu-"
+export CROSS_COMPILE="aarch64-linux-android-"
 export KBUILD_BUILD_USER="haha"
 export KBUILD_BUILD_HOST="DD3Boh"
-export TOOL_CHAIN_PATH="${HOME}/kernel/linaro-6.3-aarch64-linux/bin"
+export TOOL_CHAIN_PATH="${HOME}/kernel/aarch64-linux-android-6.x/bin"
 export CONFIG_ABS_PATH="arch/${ARCH}/configs/${CONFIG_FILE}"
 export PATH=$PATH:${TOOL_CHAIN_PATH}
-export objdir="${HOME}/kernel/zuk/obj"
-export sourcedir="${HOME}/kernel/zuk/kernel"
-export anykernel="${HOME}/kernel/zuk/anykernel"
+export objdir="${HOME}/kernel/zuk/darkmoon-obj"
+export sourcedir="${HOME}/kernel/zuk/DarkMoon"
+export anykernel="${HOME}/kernel/zuk/darkmoon-anykernel"
 compile() {
   make O=$objdir ARCH=arm64 CROSS_COMPILE=${TOOL_CHAIN_PATH}/${CROSS_COMPILE}  $CONFIG_FILE -j4
   make O=$objdir -j6
@@ -38,6 +38,9 @@ dtbuild(){
   cd $sourcedir
   ./tools/dtbToolCM -2 -o $objdir/arch/arm64/boot/dt.img -s 4096 -p $objdir/scripts/dtc/ $objdir/arch/arm64/boot/dts/
 }
+delete_zip(){
+find . -name "*.zip" -type f -delete
+}
 build_package(){
   cd $anykernel
   zip -r9 UPDATE-AnyKernel2.zip * -x README UPDATE-AnyKernel2.zip
@@ -48,6 +51,7 @@ cd $sourcedir
 #clean
 compile
 module_stock
+delete_zip
 build_package
 turn_back
 #dtbuild
