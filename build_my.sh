@@ -39,10 +39,11 @@ dtbuild(){
   ./tools/dtbToolCM -2 -o $objdir/arch/arm64/boot/dt.img -s 4096 -p $objdir/scripts/dtc/ $objdir/arch/arm64/boot/dts/
 }
 delete_zip(){
-find . -name "*.zip" -type f -delete
+  cd $anykernel
+  find . -name "*.zip" -type f
+  find . -name "*.zip" -type f -delete
 }
 build_package(){
-  cd $anykernel
   zip -r9 UPDATE-AnyKernel2.zip * -x README UPDATE-AnyKernel2.zip
 }
 turn_back(){
