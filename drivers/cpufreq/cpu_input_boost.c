@@ -90,16 +90,12 @@ struct boost_policy {
 static struct boost_policy *boost_policy_g;
 
 static void ib_boost_cpus(struct boost_policy *b);
-static uint32_t get_boost_freq(struct boost_policy *b, uint32_t cpu);
+static uint32_t get_boost_freq(const struct ib_config *ib, uint32_t cpu);
 static uint32_t get_boost_state(struct boost_policy *b);
-static void set_boost_freq(struct boost_policy *b,
-		uint32_t cpu, uint32_t freq);
 static void set_boost_bit(struct boost_policy *b, uint32_t state);
 static void clear_boost_bit(struct boost_policy *b, uint32_t state);
 static void unboost_all_cpus(struct boost_policy *b);
 static void update_online_cpu_policy(void);
-static bool validate_cpu_freq(struct cpufreq_frequency_table *pos,
-		uint32_t *freq);
 
 static void ib_boost_main(struct work_struct *work)
 {
@@ -128,7 +124,7 @@ static void ib_boost_main(struct work_struct *work)
 		if (freq == policy.min)
 			continue;
 
-		boost_freq = get_boost_freq(b, cpu);
+		boost_freq = get_boost_freq(ib, cpu);
 
 		/*
 		 * Increase or decrease the boost duration for all CPUs by
@@ -234,8 +230,7 @@ static int do_cpu_boost(struct notifier_block *nb,
 	struct cpufreq_policy *policy = data;
 	struct boost_policy *b = boost_policy_g;
 	struct ib_config *ib = &b->ib;
-	uint32_t boost_freq, state;
-	bool ret;
+	uint32_t state;
 
 	if (action != CPUFREQ_ADJUST)
 		return NOTIFY_OK;
@@ -260,20 +255,11 @@ static int do_cpu_boost(struct notifier_block *nb,
 	 * Boost to policy->max if the boost frequency is higher than it. When
 	 * unboosting, set policy->min to the absolute min freq for the CPU.
 	 */
-	if (ib->cpus_to_boost & CPU_MASK(policy->cpu)) {
-		boost_freq = get_boost_freq(b, policy->cpu);
-		/*
-		 * Boost frequency must always be valid. If it's invalid
-		 * (validate_cpu_freq() returns true), then update the
-		 * input-boost freq array with the validated frequency.
-		 */
-		ret = validate_cpu_freq(policy->freq_table, &boost_freq);
-		if (ret)
-			set_boost_freq(b, policy->cpu, boost_freq);
-		policy->min = min(policy->max, boost_freq);
-	} else {
+	if (ib->cpus_to_boost & CPU_MASK(policy->cpu))
+		policy->min =
+			min(policy->max, get_boost_freq(ib, policy->cpu));
+	else
 		policy->min = policy->cpuinfo.min_freq;
-	}
 
 	return NOTIFY_OK;
 }
@@ -447,34 +433,13 @@ static void ib_boost_cpus(struct boost_policy *b)
 	}
 }
 
-static uint32_t get_boost_freq(struct boost_policy *b, uint32_t cpu)
+static uint32_t get_boost_freq(const struct ib_config *ib, uint32_t cpu)
 {
-	struct ib_config *ib = &b->ib;
-	uint32_t freq;
-
 	/*
 	 * The boost frequency for a LITTLE CPU is stored at index 0 of
 	 * ib->freq[]. The frequency for a big CPU is stored at index 1.
 	 */
-	spin_lock(&b->lock);
-	freq = ib->freq[CPU_MASK(cpu) & LITTLE_CPU_MASK ? 0 : 1];
-	spin_unlock(&b->lock);
-
-	return freq;
-}
-
-static void set_boost_freq(struct boost_policy *b,
-		uint32_t cpu, uint32_t freq)
-{
-	struct ib_config *ib = &b->ib;
-
-	/*
-	 * The boost frequency for a LITTLE CPU is stored at index 0 of
-	 * ib->freq[]. The frequency for a big CPU is stored at index 1.
-	 */
-	spin_lock(&b->lock);
-	ib->freq[CPU_MASK(cpu) & LITTLE_CPU_MASK ? 0 : 1] = freq;
-	spin_unlock(&b->lock);
+	return ib->freq[CPU_MASK(cpu) & LITTLE_CPU_MASK ? 0 : 1];
 }
 
 static uint32_t get_boost_state(struct boost_policy *b)
@@ -534,41 +499,25 @@ static void update_online_cpu_policy(void)
 	put_online_cpus();
 }
 
-static bool validate_cpu_freq(struct cpufreq_frequency_table *pos,
-		uint32_t *freq)
+static uint32_t get_valid_cpufreq(uint32_t cpu, uint32_t freq)
 {
-	struct cpufreq_frequency_table *next;
+	struct cpufreq_frequency_table *table;
+	struct cpufreq_policy policy;
+	uint32_t index;
+	int ret;
 
-	/* Set the cursor to the first valid freq */
-	cpufreq_next_valid(&pos);
+	ret = cpufreq_get_policy(&policy, cpu);
+	if (ret)
+		return freq;
 
-	/* Requested freq is below the lowest freq, so use the lowest freq */
-	if (*freq < pos->frequency) {
-		*freq = pos->frequency;
-		return true;
-	}
+	table = cpufreq_frequency_get_table(cpu);
+	if (!table)
+		return freq;
 
-	for (;; pos++) {
-		/* This freq exists in the table so it's definitely valid */
-		if (*freq == pos->frequency)
-			return false;
+	cpufreq_frequency_table_target(&policy, table, freq,
+					CPUFREQ_RELATION_L, &index);
 
-		next = pos + 1;
-
-		/* We've gone past the highest freq, so use the highest freq */
-		if (!cpufreq_next_valid(&next)) {
-			*freq = pos->frequency;
-			return true;
-		}
-
-		/* Target the next-highest freq */
-		if (*freq > pos->frequency && *freq < next->frequency) {
-			*freq = next->frequency;
-			return true;
-		}
-	}
-
-	return false;
+	return table[index].frequency;
 }
 
 static ssize_t enabled_write(struct device *dev,
@@ -613,10 +562,8 @@ static ssize_t ib_freqs_write(struct device *dev,
 		return -EINVAL;
 
 	/* freq[0] is assigned to LITTLE cluster, freq[1] to big cluster */
-	spin_lock(&b->lock);
-	ib->freq[0] = freq[0];
-	ib->freq[1] = freq[1];
-	spin_unlock(&b->lock);
+	ib->freq[0] = get_valid_cpufreq(0, freq[0]);
+	ib->freq[1] = get_valid_cpufreq(2, freq[1]);
 
 	return size;
 }
@@ -655,14 +602,9 @@ static ssize_t ib_freqs_read(struct device *dev,
 {
 	struct boost_policy *b = boost_policy_g;
 	struct ib_config *ib = &b->ib;
-	uint32_t freq[2];
 
-	spin_lock(&b->lock);
-	freq[0] = ib->freq[0];
-	freq[1] = ib->freq[1];
-	spin_unlock(&b->lock);
-
-	return snprintf(buf, PAGE_SIZE, "%u %u\n", freq[0], freq[1]);
+	return snprintf(buf, PAGE_SIZE, "%u %u\n",
+				ib->freq[0], ib->freq[1]);
 }
 
 static ssize_t ib_duration_ms_read(struct device *dev,
