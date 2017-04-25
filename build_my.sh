@@ -1,4 +1,9 @@
 #!/bin/bash
+kernel_version=${1}
+kernel_name="DarkMoon"
+device_name="Z2"
+zip_name="$kernel_name-$device_name-$kernel_version.zip"
+
 export CONFIG_FILE="darkmoon_defconfig"
 export ARCH="arm64"
 export CROSS_COMPILE="aarch64-linux-android-"
@@ -46,6 +51,9 @@ delete_zip(){
 build_package(){
   zip -r9 UPDATE-AnyKernel2.zip * -x README UPDATE-AnyKernel2.zip
 }
+make_name(){
+  mv UPDATE-AnyKernel2.zip $zip_name
+}
 turn_back(){
 cd $sourcedir
 }
@@ -54,6 +62,7 @@ compile
 module_stock
 delete_zip
 build_package
+make_name
 turn_back
 #dtbuild
 #cp $objdir/arch/arm64/boot/zImage $sourcedir/zImage
