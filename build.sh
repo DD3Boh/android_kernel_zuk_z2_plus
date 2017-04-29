@@ -4,7 +4,7 @@ rm -rf modules
 export CONFIG_FILE="darkmoon_defconfig"
 export ARCH="arm64"
 export CROSS_COMPILE="aarch64-linux-android-"
-export KBUILD_BUILD_USER="haha"
+export KBUILD_BUILD_USER="Lemoncè"
 export KBUILD_BUILD_HOST="DD3Boh"
 export TOOL_CHAIN_PATH="${HOME}/caf/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin"
 export CONFIG_ABS_PATH="arch/${ARCH}/configs/${CONFIG_FILE}"
